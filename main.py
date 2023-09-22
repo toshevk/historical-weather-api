@@ -11,9 +11,27 @@ def home():
     return render_template("home.html", data=stations.to_html())
 
 
+@app.route("/api/v1/<station>")
+def station_data(station):
+    filenum = str(station).zfill(6)
+    station_data_filepath = "data_small/TG_STAID" + filenum + ".txt"
+    df = pd.read_csv(station_data_filepath, skiprows=20, parse_dates=['    DATE'])
+    result = df.to_dict(orient="records")
+    return result
+
+
+@app.route("/api/v1/yearly/<station>/<year>")
+def yearly_station_data(station, year):
+    filenum = str(station).zfill(6)
+    station_data_filepath = "data_small/TG_STAID" + filenum + ".txt"
+    df = pd.read_csv(station_data_filepath, skiprows=20)
+    df['    DATE'] = df['    DATE'].astype(str)
+    result = df[df['    DATE'].str.startswith(str(year))].to_dict(orient="records")
+    return result
+
+
 @app.route("/api/v1/<station>/<date>/")
 def api(station, date):
-
     # read station csv
     filenum = str(station).zfill(6)
     station_data_filepath = "data_small/TG_STAID" + filenum + ".txt"
